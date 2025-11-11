@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import {motion} from "motion/react";
-import { Button } from '@mantine/core';
 import { X , Menu} from 'lucide-react';
 import { useState } from "react";
+import { Button } from '@mantine/core';
 
 
 function Navbar() {
