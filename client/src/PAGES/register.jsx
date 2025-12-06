@@ -6,11 +6,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
-// import { register } from "../../../server/Controller/authController";
+import {SignUp} from '../redux/slice/authSlice';
+import { useDispatch , useSelector} from 'react-redux';
+import { Loader } from '@mantine/core';
 
 
 function register() {
 
+  const dispatch = useDispatch();
+  const {loading} = useSelector((state)=>state.authentication);
   const [isEyeClick, setIsEyeClick] = useState(false);
 
   // Create a validation schema for user registeraion
@@ -24,9 +28,6 @@ function register() {
               })
               .refine((email) => email.includes("."), {
                 message : "Email address must contain '.'"
-              })
-              .refine((email) => email.toLowerCase().endsWith("com"), {
-                message : "Email address must ends with 'com'."
               })
               .transform((email) => email.toLowerCase()),
     password :  z.string()
@@ -56,9 +57,9 @@ function register() {
   });
 
   const onSubmit = (data) => {
-    console.log(data)
+    dispatch(SignUp(data));
     reset();
-  }
+  };
 
   return (
     <div>
@@ -106,7 +107,13 @@ function register() {
             {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
             </div>
             <div className="flex justify-center">
-              <Button type="submit"className="">Register</Button>
+
+              <Button 
+                type="submit"
+                className="">
+                  {loading ? <Loader size={16} color="white"/> : "Register"}
+                </Button>
+
             </div>
           </form>
         </motion.div>

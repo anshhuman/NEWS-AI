@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import {useForm} from 'react-hook-form'; 
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
+import {useSelector , useDispatch} from 'react-redux';
+import {SignIn} from '../redux/slice/authSlice';
 
 // function login() {
 //   const [eyeOpen, setEyeOpen] = useState(true);
@@ -55,6 +57,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 
 function Login() {
 
+  const dispatch = useDispatch();
   const [isEyeClick, setIsEyeClick] = useState(false);
 
   const handleEyeClick = () => {
@@ -98,8 +101,10 @@ function Login() {
 
   const onSubmit = (data) => {
     console.log(data)
-    reset();
-  }
+    // reset();
+    dispatch(SignIn(data));
+  };
+
   console.log(errors);
   // Login form validation schema
 

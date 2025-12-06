@@ -1,6 +1,7 @@
 import User from "../Model/model.js";
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
+import redisClient from "../Redis/redisServer.js";
 
 // Controller for login
 export const login = async (req, res) => {
@@ -8,7 +9,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    console.log(user)
+    // console.log(`1.) User found: ${user}`)
     // console.log(user.name , user.email , user.password , user.id)
 
     // Check if user is registered or not
@@ -24,30 +25,51 @@ export const login = async (req, res) => {
       return res.status(404).json({
         message: "Password not matched",
       });
-     } else {
-      
-       
+    } else {
+      // If user passes both the steps , then generate the token
+      const payload = {
+        id: user._id,
+        user: user.name,
+        email: user.email,
+      };
 
-    // If user passes both the steps , then generate the token 
-     const payload = {
-       user: user.name,
-       email: user.email
-     }
+      const token = jwt.sign(payload, "This is secret key", {
+        expiresIn: "1D",
+      });
+      console.log(`2.) Generated token:  ${token}`);
 
-     const token = jwt.sign(payload , "This is secret key" , {expiresIn: '1D'})
-     console.log(`Generated token:  ${token}`)
+      // Set the token in Browser/Storage/Cookie with the name "token"
+      // Server on hone ke baad jab browser -> Client ko request bhejega toh Cookie Response.headers ke Set-Cookie
+      // me jaake save hogi.
+      // Fir jab Browser dobara se Server ko request bhejega toh Cookie request.headers ke andar jaake token me save hojayegi.
+      res.cookie("token", token, {
+        httpOnly: true, // Meaning => Frontend se is token(cookie) ko user access nahi kar skta . For ex => "document.cookie"
+      });
 
-     // Set the token in cookie 
-     res.cookie('token',token,{
-        httpOnly:true
-     });
-     res.status(200).json({
-        message: "login successfully"
-     })
+      // Save token to redis
+      const redisKey = `token:${user._id.toString()}`;
+      console.log(`User-ID on Redis : ${redisKey}`);
+      const expirySeconds = 24 * 60 * 60; // 1 day (match jwt expiry)
+      await redisClient.set(redisKey, token, { EX: expirySeconds });
+
+      res.status(200).json({
+        message: "login successfully",
+      });
     }
   } catch (error) {}
 };
 
+export const verify = async (req, res) => {
+  // console.log('verify wali', req.user);
+  if (!req.user) {
+  } else {
+    return res.status(200).json({
+      authenticated: true,
+      id: req.user.id,
+      name: req.user.user,
+    });
+  }
+};
 
 // Controller for register
 export const register = async (req, res) => {
@@ -62,7 +84,7 @@ export const register = async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 12);
-    console.log(hashPassword);
+    console.log(`Hashed password: ${hashPassword}`);
 
     // Create a new user
     const newUser = await User.create({ name, email, password: hashPassword });
@@ -81,10 +103,6 @@ export const register = async (req, res) => {
 //     word stronger.
 // 3) After bcrypt the password , save it in the password key
 // 4) In login controller , if the user exists then compare the password by using bcrypt.compare().
-// 5) There are two stages in login authentication. First is , check the user mail ID and password. 
-//    If the user passes both the stages then the last stage is token generation. 
-// 6) Generate token using JWT and save the token in the cookie. 
-
-
-// chaudhary token = j%3A%7B%22httpOnly%22%3Atrue%7D
-// anshuman token = j%3A%7B%22httpOnly%22%3Atrue%7D
+// 5) There are two stages in login authentication. First is , check the user mail ID and password.
+//    If the user passes both the stages then the last stage is token generation.
+// 6) Generate token using JWT and save the token in the cookie.
