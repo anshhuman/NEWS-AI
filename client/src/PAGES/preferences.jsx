@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { CircleCheckBig } from "lucide-react";
 import { Button } from '@mantine/core';
+import {useSelector} from 'react-redux';
+import { useNavigate } from "react-router-dom";
 
 
 function Preferences() {
+  const {authenticated}  = useSelector((state)=>state.authentication)
+  const navigate = useNavigate();
+  console.log(authenticated)
+  if(authenticated === false) {
+    navigate('/login')
+  }
   const [selectedCategory, setSelectedCategory] = useState([]);
   const categories = [
     "Politics",

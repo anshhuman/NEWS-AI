@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { motion } from "motion/react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@mantine/core";
@@ -9,6 +9,7 @@ import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useSelector , useDispatch} from 'react-redux';
 import {SignIn} from '../redux/slice/authSlice';
+import { useNavigate } from "react-router-dom";
 
 // function login() {
 //   const [eyeOpen, setEyeOpen] = useState(true);
@@ -56,6 +57,19 @@ import {SignIn} from '../redux/slice/authSlice';
 
 
 function Login() {
+
+  const navigate = useNavigate();
+
+  const {authenticated , preferences} = useSelector((state)=>state.authentication)
+  console.log(authenticated)
+  
+  useEffect(()=>{
+    if(preferences.length > 0 && authenticated) {
+      navigate('/');
+    } else if (authenticated && preferences.length === 0) {
+      navigate('/preferences');
+    }
+  },[authenticated])
 
   const dispatch = useDispatch();
   const [isEyeClick, setIsEyeClick] = useState(false);

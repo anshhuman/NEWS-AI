@@ -1,9 +1,15 @@
 import {createSlice , createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { setCookie , getCookie , delCookie} from '../../utils/utils.js';
 
 const initialState = {
     loading : false , 
+    name : null,
+    authenticated : getCookie('authenticated') || false , 
+    id : null,
+    token : null,
+    preferences : []
 }
 
 // Create slice for user registration
@@ -28,7 +34,7 @@ export const SignIn = createAsyncThunk('/Login' , async(data , {rejectWithValue}
         const verifyres = await axios.get(`${import.meta.env.VITE_API_URL}/auth/verify`,
           {withCredentials : true}
         );
-        return res.data;
+        return {...res.data , ...verifyres.data};
     } catch (error) {
         return rejectWithValue(error);
     }
@@ -38,8 +44,23 @@ export const SignIn = createAsyncThunk('/Login' , async(data , {rejectWithValue}
 
 
 const authSlice = createSlice({
+
     name : 'User-Authentication',
     initialState,
+
+    reducers : {
+      signOut : function (state) {
+        state.authenticated = false;
+        state.id = null;
+        state.name = null;
+        state.token = null;
+        delCookie('authenticated');
+        delCookie('name');
+        delCookie('id');
+        delCookie('token');
+      }
+    },
+
     extraReducers : (builder) => {
     builder
       .addCase(SignUp.pending, (state) => {
@@ -61,11 +82,21 @@ const authSlice = createSlice({
       .addCase(SignIn.fulfilled , (state , action) => {
         state.loading = false;
         console.log(action.payload);
+        state.name = action.payload.name;
+        state.authenticated = action.payload.authenticated;
+        state.id = action.payload.id;
+        state.preferences = action.payload.preferences;
+        toast.success(action.payload.message);
+        setCookie('name' , action.payload.name);
+        setCookie('authenticated' , action.payload.authenticated);
+        setCookie('id' , action.payload.id);
+        setCookie('token' , action.payload.token);
       });
   },
 });
 
 export default authSlice.reducer;
+export const {signOut} = authSlice.actions
 
 // 1.) const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`,data,{withCredentials : true});
 

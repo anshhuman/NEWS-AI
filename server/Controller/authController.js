@@ -47,18 +47,22 @@ export const login = async (req, res) => {
       });
 
       // Save token to redis
-      const redisKey = `token:${user._id.toString()}`;
+      const redisKey = `User-ID:${user._id.toString()}`;
       console.log(`User-ID on Redis : ${redisKey}`);
       const expirySeconds = 24 * 60 * 60; // 1 day (match jwt expiry)
       await redisClient.set(redisKey, token, { EX: expirySeconds });
 
       res.status(200).json({
         message: "login successfully",
+        token: token,
+        preferences : user.preferences
       });
     }
   } catch (error) {}
 };
 
+
+// This controller is the last one to work , if all things are fine till now. 
 export const verify = async (req, res) => {
   // console.log('verify wali', req.user);
   if (!req.user) {

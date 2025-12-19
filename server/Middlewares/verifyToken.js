@@ -46,7 +46,7 @@ export const tokenMw = async (req, res, next) => {
 
     // Now check Redis: whether token exists / matches stored value
     // We used key `token:<userId>` when saving
-    const redisKey = `token:${req.user.id}`; // ensure payload contains id
+    const redisKey = `User-ID:${req.user.id}`; // ensure payload contains id
     console.log(`Redis-Key : ${redisKey}`)
     const storedToken = await redisClient.get(redisKey);
     console.log(`Stored-Token : ${storedToken}`)
@@ -58,7 +58,7 @@ export const tokenMw = async (req, res, next) => {
     if (storedToken !== token) {
       return res.status(401).json({ message: "Token mismatch — please login again" });
     }
-``
+
     // All good
     next();
   } catch (err) {
