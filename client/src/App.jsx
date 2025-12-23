@@ -8,6 +8,7 @@ import Preferences from './PAGES/preferences.jsx';
 import Homepage from './PAGES/homepage.jsx';
 import { Toaster } from 'sonner';
 import ProtectedRoutes from './COMPONENTS/ProtectedRoutes.jsx'
+import PreferenceProtectRoute from './COMPONENTS/preferenceProtectRoute.jsx';
 
 
 function App() {
@@ -20,7 +21,9 @@ function App() {
         <Routes>
 
           <Route element={<ProtectedRoutes />}>
-            <Route path='/preferences' element={<Preferences/>} />
+            <Route element={<PreferenceProtectRoute/>}>
+              <Route path='/preferences' element={<Preferences/>} />
+            </Route>
             <Route path='/' element={<Homepage/>} />
           </Route>
 

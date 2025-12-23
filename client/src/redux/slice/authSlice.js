@@ -58,6 +58,8 @@ const authSlice = createSlice({
         delCookie('name');
         delCookie('id');
         delCookie('token');
+        delCookie('preferences');
+        localStorage.removeItem('preferences');
       }
     },
 
@@ -91,6 +93,9 @@ const authSlice = createSlice({
         setCookie('authenticated' , action.payload.authenticated);
         setCookie('id' , action.payload.id);
         setCookie('token' , action.payload.token);
+      }).
+      addCase(SignIn.rejected , (state , action) => {
+        toast.error(action.payload.response.data.message);
       });
   },
 });

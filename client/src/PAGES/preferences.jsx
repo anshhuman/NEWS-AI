@@ -2,18 +2,29 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { CircleCheckBig } from "lucide-react";
 import { Button } from '@mantine/core';
-import {useSelector} from 'react-redux';
+import {useSelector , useDispatch} from 'react-redux';
 import { useNavigate } from "react-router-dom";
+import { userPreferences } from "../redux/slice/prefrencesSlice";
+import { Loader } from '@mantine/core';
+
 
 
 function Preferences() {
+
   const {authenticated}  = useSelector((state)=>state.authentication)
+  const {loading}  = useSelector((state)=>state.preferences)
+  
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
   console.log(authenticated)
+
   if(authenticated === false) {
     navigate('/login')
   }
+
   const [selectedCategory, setSelectedCategory] = useState([]);
+
   const categories = [
     "Politics",
     "Sports",
@@ -22,6 +33,7 @@ function Preferences() {
     "Health",
     "Science",
   ];
+
   const toogleCategory = (category) => {
     setSelectedCategory(
       selectedCategory.includes(category)
@@ -29,8 +41,16 @@ function Preferences() {
         : [...selectedCategory, category]
     );
   };
+
+  const handleClick = async() => {
+   await dispatch(userPreferences({preferences : selectedCategory}))
+    navigate('/')
+  }
+
   console.log(selectedCategory);
+
   return (
+
     <div className="h-screen flex flex-col justify-center items-center">
       <div className="text-xl font-bold text-4xl tracking-wide">
         <h1>Select your Interests</h1>
@@ -55,9 +75,15 @@ function Preferences() {
           </motion.div>
         ))}
       </div>
-      <Button variant="light" className="mt-5">Save preferences</Button>
+      <Button
+          variant="light" 
+          className="mt-5" 
+          onClick={handleClick}>
+          {loading ? <Loader size="sm" /> : "Save Preferences"}
+          </Button>
     </div>
   );
+
 }
 
 export default Preferences;
