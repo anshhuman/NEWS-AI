@@ -9,7 +9,7 @@ const initialState = {
     authenticated : getCookie('authenticated') || false , 
     id : null,
     token : null,
-    preferences : []
+    preferences : [],
 }
 
 // Create slice for user registration
@@ -93,6 +93,7 @@ const authSlice = createSlice({
         setCookie('authenticated' , action.payload.authenticated);
         setCookie('id' , action.payload.id);
         setCookie('token' , action.payload.token);
+        setCookie('email' , action.payload.email);
       }).
       addCase(SignIn.rejected , (state , action) => {
         toast.error(action.payload.response.data.message);

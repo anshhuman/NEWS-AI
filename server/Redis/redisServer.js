@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-const redisClient = createClient({url : process.env.REDIS_URL || "redis://127.0.0.1:53590" });
+const redisClient = createClient({url : process.env.REDIS_URL || "redis://127.0.0.1:64271" });
 
 redisClient.on("error", (err) => console.log("Redis Error:", err));
 

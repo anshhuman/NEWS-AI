@@ -9,6 +9,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+    console.log(`Email : ${email}`)
     // console.log(`1.) User found: ${user}`)
     // console.log(user.name , user.email , user.password , user.id)
 
@@ -30,7 +31,7 @@ export const login = async (req, res) => {
       const payload = {
         id: user._id,
         user: user.name,
-        email: user.email,
+        email: email,
       };
 
       const token = jwt.sign(payload, "This is secret key", {
@@ -51,10 +52,11 @@ export const login = async (req, res) => {
       console.log(`User-ID on Redis : ${redisKey}`);
       const expirySeconds = 24 * 60 * 60; // 1 day (match jwt expiry)
       await redisClient.set(redisKey, token, { EX: expirySeconds });
-
+      // console.log(`User email ${user.email}`)
       res.status(200).json({
         message: "login successfully",
         token: token,
+        email: email,
         preferences : user.preferences
       });
     }
@@ -71,6 +73,7 @@ export const verify = async (req, res) => {
       authenticated: true,
       id: req.user.id,
       name: req.user.user,
+      email: req.user.email
     });
   }
 };
