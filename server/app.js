@@ -5,6 +5,8 @@ import userRoutes from './Routes/userRoutes.js';
 import prefRoutes from './Routes/prefRoutes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import bookmarkRouter from './Routes/bookmarkRoute.js';
+import readingHistoryRouter from './Routes/readHistoryRoute.js';
 
 
 const app = express();
@@ -22,6 +24,8 @@ dbConnect();
 
 app.use("/auth" , userRoutes);
 app.use("/pref" , prefRoutes);
+app.use("/book" , bookmarkRouter);
+app.use("/history" , readingHistoryRouter);
 
 
 app.listen(process.env.PORT , () => {
