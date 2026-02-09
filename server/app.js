@@ -31,7 +31,7 @@ app.use(cors(
 ));
 dbConnect();
 
-// const countries = ['us', 'uk', 'fr', 'in', 'it'];
+
 // const categories = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
 
 

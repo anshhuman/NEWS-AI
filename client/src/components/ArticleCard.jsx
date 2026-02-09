@@ -14,6 +14,8 @@ import axios from 'axios';
 import { useDisclosure } from '@mantine/hooks';
 import { Eye, Bookmark, Sparkles } from 'lucide-react';
 import { useEffect } from 'react';
+import {getCookie} from '../utils/utils.js';
+
 
 
 const ArticleCard = ({ article, category }) => {
@@ -27,10 +29,13 @@ const ArticleCard = ({ article, category }) => {
     open();
     setIsLoading(true);
     try {
+      const id = getCookie("id");
+      console.log(`UserID in ArticleCard: ${id}`);
       const res = await axios.post(
         `http://localhost:3000/ai/generate-content`,
         {
           url: article.url,
+          userID : id
         }
       );
       setIsLoading(false);
