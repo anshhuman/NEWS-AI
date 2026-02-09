@@ -2,7 +2,7 @@ import React from 'react'
 import { Tabs } from '@mantine/core';
 import { useState } from 'react';
 import axios from 'axios';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ArticleCard from './ArticleCard';
 
@@ -84,6 +84,7 @@ function Category() {
                 <b>Yay! You have seen it all</b>
               </p>
             } > 
+            <div>
             {data?.pages.length >= 0 && 
             data?.pages.map((page , pageIndex) => 
                 page.articles.map((article , articleIndex) => (
@@ -91,6 +92,7 @@ function Category() {
                 ))
             )
               }
+              </div>
             </InfiniteScroll>
         </div>
     </div>
