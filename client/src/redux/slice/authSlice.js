@@ -2,6 +2,10 @@ import {createSlice , createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { setCookie , getCookie , delCookie} from '../../utils/utils.js';
+import {auth,googleAuthProvider} from './../../Config/firebase.js' ;
+import {signInWithPopup} from 'firebase/auth'
+import {PreferenceProtectRoute} from '../../COMPONENTS/preferenceProtectRoute.jsx';
+
 
 const initialState = {
     loading : false , 
@@ -13,6 +17,26 @@ const initialState = {
 }
 
 // Create slice for user registration
+
+export const signInWithGoogle = createAsyncThunk('/google-auth' , async () => {
+  try{
+    const result = await signInWithPopup(auth, googleAuthProvider);
+    const token = await result.user.getIdToken();
+    const userId = getCookie('id')
+    console.log(`UserId : ${userId}`)
+    console.log(`Google Sign-In successful. User ID: ${userId}, Token: ${token}`);
+    console.log(token);
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/google-auth`, {token} , {withCredentials : true});
+    // console.log(`Response from backend: ${JSON.stringify(res.data)}`);
+    console.log(res.data);
+    // console.log(action.payload)
+    const verifyres = await axios.get(`${import.meta.env.VITE_API_URL}/auth/verify`,
+          {withCredentials : true}
+        );
+      return {...res.data , ...verifyres.data };
+  } catch(error) {}
+    console.error('Google Sign-In failed:', error);
+});
 
 export const SignUp = createAsyncThunk('/Register' , async (data , {rejectWithValue})=>{
     try {
@@ -97,6 +121,22 @@ const authSlice = createSlice({
       }).
       addCase(SignIn.rejected , (state , action) => {
         toast.error(action.payload.response.data.message);
+      }).addCase(signInWithGoogle.pending , (state) => {
+        state.loading = true;
+      }).addCase(signInWithGoogle.fulfilled , (state , action) => {
+        state.loading = false;
+        console.log(action.payload);
+        state.name = action.payload.name;
+        setCookie('name' , action.payload.name);
+        setCookie('email' , action.payload.email);
+        state.authenticated = true;
+        setCookie('authenticated' , true);
+        setCookie('id' , action.payload.id);
+        // state.id = action.payload.id;  
+        toast.success('Login successful');
+      }).addCase(signInWithGoogle.rejected , (state , action) => {
+        state.loading = false;
+        toast.error('Login failed');
       });
   },
 });

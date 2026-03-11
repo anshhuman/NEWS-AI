@@ -8,8 +8,10 @@ import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useSelector , useDispatch} from 'react-redux';
-import {SignIn} from '../redux/slice/authSlice';
+import {SignIn , signInWithGoogle} from './../redux/slice/authSlice';
 import { useNavigate } from "react-router-dom";
+import GoogleIcon from './../COMPONENTS/googleIcon'
+
 
 // function login() {
 //   const [eyeOpen, setEyeOpen] = useState(true);
@@ -159,6 +161,9 @@ function Login() {
           </div>
           <div className="flex justify-center">
           <Button type='submit'className="">Login</Button>
+          <Button variant="outline" className="ml-4 flex items-center gap-2" onClick={()=>dispatch(signInWithGoogle())} leftSection={<GoogleIcon/>}>
+            Sign in with Google
+          </Button>
           </div>
           <p className="text-center">Dont have an account ? <Link to = "/register" className="text-blue-500 hover:underline">Register</Link></p>
         </form>

@@ -9,7 +9,7 @@ import ArticleCard from './ArticleCard';
 
 function Category() {
   const [activeCategory, setActiveCategory] = useState('');
-  console.log(activeCategory);
+  // console.log(activeCategory);
   const categories = 
 
   ["General" ,
@@ -47,7 +47,8 @@ function Category() {
     const { data, hasNextPage, fetchNextPage, status } = useInfiniteQuery({
     queryKey: ['category', activeCategory],
     queryFn: fetchNewsByCategory,
-    getNextPageParam: (lastPage) =>  lastPage.nextPage 
+    getNextPageParam: (lastPage) => { 
+      return lastPage.nextPage }
     });
     console.log(data);
     // console.log(hasNextPage);

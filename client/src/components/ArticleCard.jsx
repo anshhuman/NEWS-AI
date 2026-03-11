@@ -4,55 +4,59 @@ import {
   Badge,
   Text,
   Group,
-  Modal,
+  Popover,
+  Tooltip,
   ActionIcon,
   Flex,
 } from '@mantine/core';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { useDisclosure } from '@mantine/hooks';
-import { Eye, Bookmark, Sparkles } from 'lucide-react';
-import { useEffect } from 'react';
+import { Eye, Bookmark, Sparkles , Copy} from 'lucide-react';
 import {getCookie} from '../utils/utils.js';
 
 
 
 const ArticleCard = ({ article, category }) => {
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, setOpened] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
 
 
-  const handleSummarize = async () => {
-    open();
+   const handleSummarize = async () => {
+    setOpened(true);
     setIsLoading(true);
+    const id = getCookie("id");
     try {
-      const id = getCookie("id");
-      console.log(`UserID in ArticleCard: ${id}`);
       const res = await axios.post(
         `http://localhost:3000/ai/generate-content`,
         {
           url: article.url,
-          userID : id
+          userID : id,
+          img : article.urlToImage,
+          description : article.description,
+          title : article.title
         }
       );
-      setIsLoading(false);
       setSummary(res.data.summary);
     } catch (error) {
       setError(error.message);
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
+
+
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(summary);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
   return (
-    <Card
-      shadow="sm"
-      p="lg"
-      radius="md"
-      withBorder
-      className="flex flex-row gap-6"
-    >
+    <Card shadow="sm" p="lg" radius="md" withBorder className="flex flex-row gap-6">
       {article.urlToImage && (
         <Image
           src={article.urlToImage}
@@ -82,53 +86,81 @@ const ArticleCard = ({ article, category }) => {
               {article.views || Math.floor(Math.random() * 500)}
             </Text>
           </Flex>
-          <ActionIcon variant="outline" size="sm" color="blue">
-            <Bookmark size={18} />
-          </ActionIcon>
-          <ActionIcon
-            variant="gradient"
-            onClick={handleSummarize}
-            size="md"
-            color="yellow"
-            gradient={{ from: 'blue', to: 'cyan', deg: 330 }}
+
+          <Tooltip label="Bookmark this article" withArrow position="top">
+            <ActionIcon variant="outline" size="sm" color="blue">
+              <Bookmark size={18} />
+            </ActionIcon>
+          </Tooltip>
+
+        
+
+          <Popover
+            opened={opened}
+            onChange={setOpened}
+            width={isLoading ? 350 : 500} 
+            position="bottom"
+            withArrow
+            shadow="md"
           >
-            <Sparkles size={18} />
-          </ActionIcon>
+            <Popover.Target>
+              <Tooltip label="Generate Summary" withArrow position="top">
+                <ActionIcon
+                  variant="gradient"
+                  onClick={handleSummarize}
+                  size="md"
+                  color="yellow"
+                  gradient={{ from: 'blue', to: 'cyan', deg: 330 }}
+                >
+                  <Sparkles size={18} />
+                </ActionIcon>
+              </Tooltip>
+            </Popover.Target>
+            <Popover.Dropdown style={{ minHeight: isLoading ? 150 : 'auto' }}>
+              {isLoading ? (
+                <Flex align="center" justify="center" gap="sm">
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    <Sparkles size={30} className="text-sky-500" />
+                  </motion.span>
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className='text-gray-500'
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    Generating...
+                  </motion.span>
+                </Flex>
+              ) : (
+                <motion.div>
+                  {summary.split(' ').map((word, index) => (
+                    <motion.span
+                      key={index}
+                      className="text-gray-800"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      {word}{' '}
+                    </motion.span>
+                  ))}
+                  <Flex justify="flex-end" mt="sm">
+                    <Tooltip label={copySuccess ? "Copied!" : "Copy summary"} withArrow position="top">
+                      <ActionIcon variant="outline" size="sm" color="blue" onClick={handleCopy}>
+                        <Copy size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Flex>
+                </motion.div>
+              )}
+            </Popover.Dropdown>
+          </Popover>
         </Group>
       </div>
-      <Modal size="md" opened={opened} onClose={close} title="Summary">
-        {isLoading ? (
-          <div className="h-full flex justify-center gap-6 items-center">
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, rotate: 360 }}
-              transition={{ repeat: Infinity, delay: 1 }}
-            >
-              <Sparkles size={20} className="animate-pulse text-sky-500" />
-            </motion.span>
-            <motion.span
-              className="text-black"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ repeat: Infinity, delay: 1 }}
-            >
-              Generating...
-            </motion.span>
-          </div>
-        ) : (
-          <div>
-            {summary.split(' ').map((word, index) => (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, rotate: 360 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                {word}{' '}
-              </motion.span>
-            ))}
-          </div>
-        )}
-      </Modal>
     </Card>
   );
 };

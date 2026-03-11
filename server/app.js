@@ -14,7 +14,11 @@ import { Article } from './Model/articleModel.js';
 import {CronJob} from 'cron';
 import morgan from 'morgan';
 import { fetchNewsAndStore , job} from './Controller/articlePushIntoDB.js';
-
+import helmet from 'helmet';
+// import serviceAccount from './key/serviceAccountKey.json' assert {type: 'json'};
+import serviceAccount from './news-aggregator-338f2-firebase-adminsdk-fbsvc-f5ac03a0f7.json' with {type:"json"};
+// import serviceAccount from "./firebaseServiceAccount.json" assert { type: "json" };
+import admin from 'firebase-admin';
 
 
 const app = express();
@@ -23,6 +27,10 @@ dotenv.config();
 app.use(express.json());
 app.use(cookieParser());
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 app.use(cors(
     {
         credentials : true,
@@ -30,6 +38,12 @@ app.use(cors(
     }
 ));
 dbConnect();
+
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: false,
+  })
+);
 
 
 // const categories = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];

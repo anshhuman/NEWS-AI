@@ -3,6 +3,7 @@ import { Avatar, Tabs, Text, Button, Container, Card } from '@mantine/core';
 import { Bookmark } from 'lucide-react';
 import { size } from 'zod';
 import { getCookie } from '../utils/utils.js';
+import Demo from '../COMPONENTS/userReadingHistory.jsx';
 
 
 function Profile() {
@@ -40,7 +41,7 @@ function Profile() {
         <Tabs.Tab value="bookmarks">📌 Bookmarks</Tabs.Tab>
         <Tabs.Tab value="liked-news">❤️ Liked News</Tabs.Tab>
         <Tabs.Tab value="AI-recommendations">🤖 AI Recommendations</Tabs.Tab>
-        <Tabs.Tab value="preferences">⚙ Preferences</Tabs.Tab>
+        <Tabs.Tab value="Reading-History">⚙ Reading-History</Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="bookmarks" className="mt-4">
@@ -55,8 +56,8 @@ function Profile() {
         AI content
       </Tabs.Panel>
 
-      <Tabs.Panel value="preferences" className="mt-4">
-        Preferences content
+      <Tabs.Panel value="Reading-History" className="mt-4">
+        <Demo/>
       </Tabs.Panel>
     </Tabs>
   </div>

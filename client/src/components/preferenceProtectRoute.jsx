@@ -5,7 +5,7 @@ import axios from "axios";
 import { getCookie } from '../utils/utils.js';
 
 
-function PreferenceProtectRoute() {
+export const PreferenceProtectRoute = () => {
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
 

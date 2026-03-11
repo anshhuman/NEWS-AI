@@ -21,9 +21,9 @@ function App() {
         <Routes>
 
           <Route element={<ProtectedRoutes />}>
+              <Route path='/profile' element = {<Profile/>}/>
             <Route element={<PreferenceProtectRoute/>}>
               <Route path='/preferences' element={<Preferences/>} />
-              <Route path='/profile' element = {<Profile/>}/>
             </Route>
             <Route path='/' element={<Homepage/>} />
           </Route>

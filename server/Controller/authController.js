@@ -2,6 +2,7 @@ import User from "../Model/model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import redisClient from "../Redis/redisServer.js";
+import admin from "firebase-admin";
 
 // Controller for login
 export const login = async (req, res) => {
@@ -34,7 +35,7 @@ export const login = async (req, res) => {
         email: email,
       };
 
-      const token = jwt.sign(payload, "This is secret key", {
+      const token = jwt.sign(payload, "This is a secret key", {
         expiresIn: "1D",
       });
       console.log(`2.) Generated token:  ${token}`);
@@ -68,6 +69,9 @@ export const login = async (req, res) => {
 export const verify = async (req, res) => {
   // console.log('verify wali', req.user);
   if (!req.user) {
+     return res.status(401).json({
+      authenticated: false,
+    })
   } else {
     return res.status(200).json({
       authenticated: true,
@@ -101,6 +105,59 @@ export const register = async (req, res) => {
     });
   } catch (error) {}
 };
+
+export const googleAuth = async(req,res) => {
+  try{
+    const {token} = req.body;
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    console.log(`Decoded token: ${JSON.stringify(decodedToken)}`);
+    const user = await User.findOne({email :decodedToken.email})
+    console.log(`User ${user}`)
+    if(!user){
+    const newUser = new User({
+      name : decodedToken.name,
+      email : decodedToken.email,
+      password :"google-auth"
+    })
+    await newUser.save()
+        // console.log(token)
+  }
+     const customToken = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        user: user.name,
+      },
+      "This is a secret key",
+      { expiresIn: "1d" }
+    );
+
+    console.log(`Custom Token : ${customToken}`)
+
+    // ✅ Save token in Redis
+    const redisKey = `User-ID:${user._id}`;
+    await redisClient.set(redisKey, customToken, {
+      EX: 24 * 60 * 60,
+    });
+
+    // ✅ Send cookie
+    res.cookie("token", customToken, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "lax",
+    });
+
+    return res.status(200).json({
+      message: "Google login successful",
+      name : user.name,
+      email : user.email,
+    });
+
+ } catch(error) {
+    console.log(error)
+  }
+}
+
 
 // How to use bcrypt library
 
